@@ -1,0 +1,26 @@
+Creating second local instance
+Create instance for replication
+	C:\Program Files\PostgreSQL\13\bin> initdb -D "C:\PostgreSQLReplication" -U postgres -W -A md5
+
+Change connection port (C:\PostgreSQLReplication\postgresql.conf)
+	port = 5433, uncomment and change from default 5432 on line 63
+
+Create window service to run (run cmd as admin)
+	C:\Program Files\PostgreSQL\13\bin> pg_ctl register -N PostgreSQLReplication -D C:\PostgreSQLReplication
+
+
+Creating replication
+Set logical replication mode (postgresql.conf on both instances)
+	wal_level = logical (uncomment and change at line 196)
+
+Restore dvdrental.tar in source instance within a database named dvdrental
+
+Create tables' replication publication in dvdrental source database (as superuser postgres)
+	CREATE PUBLICATION dvdrental_publication FOR ALL TABLES;
+
+Restore dvdrental_duplication.tar in replication instance within a database named dvdrental, it's just the empty tables
+
+Create subscription on replication instance
+	CREATE SUBSCRIPTION dvdrental_subscription 
+	CONNECTION 'host=localhost port=5432 dbname=dvdrental user=postgres password=postgres' 
+	PUBLICATION dvdrental_publication;
